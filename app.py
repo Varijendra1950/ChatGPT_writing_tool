@@ -1,28 +1,94 @@
-import streamlit as st
 import openai
-
-
-st.title('Chatting with ChatGPT')
-st.sidebar.header('Information')
-st.sidebar.info('A Streamlit web application that allows you to interact with \
-                the OpenAI API\'s implementation of the ChatGPT model.')
-
-
-engine = 'text-davinci-003'
-openai_key = ''
+import streamlit as st
 
 
 
-def chatGPT(query):
-    completion = openai.Completion.create(engine=engine, prompt=query,
-                 max_tokens=1024, n=1, temperature=0.5)
-    response = completion.choices[0].text
-    return response
+
+API_KEY = st.sidebar.text_input('Enter your API key')
+
+openai.api_key = API_KEY
 
 
-ask_chatGPT = st.text_input('Chat with ChatGPT here', value='Who invented Python?')
-key = st.sidebar.text_input('Enter your openai_key')
-openai.api_key = key
-if st.button('Send'):
-    response = chatGPT(ask_chatGPT)
-    st.write(f'{response}')
+
+def main():
+    st.sidebar.header('AI Blog Writing Tool')
+    st.sidebar.info('An AI tool that can generate blog content')
+    st.sidebar.info('Start with the first option\n before you proceed to the next.')
+    op = st.sidebar.selectbox('Steps', ['topics', 'section', 'content'])
+    if op == 'topics':
+        topics()
+    elif op == 'section':
+        section()
+    else:
+        content()
+
+
+
+
+def topics():
+    st.header('AI Blog Writing Tool')
+    st.info('To generate blog topic, please follow the pattern given below:')
+    prompt = st.text_area('Write your words', height=50, value='Generate blog topic on data science with Python')
+    if st.button('Send'):
+        st.text(BlogTopics(prompt))
+
+
+def section():
+    st.header('AI Blog Writing Tool')
+    st.info('To generate blog section, please follow the pattern given below:')
+    prompt = st.text_area('Write your words', height=50, value='Write blog sections\n\nBlog topic: ')
+    if st.button('Send'):
+        st.text(BlogSections(prompt))
+
+
+def content():
+    st.header('AI Blog Writing Tool')
+    st.info('To generate blog content, please follow the pattern given below:')
+    prompt = st.text_area('Write your words', height=50, value="Expand the blog section in a professional tone \n\nBlog Topic:\n\nSection:")
+    if st.button('Send'):
+        st.text(BlogContent(prompt))
+
+def BlogTopics(prompt):
+    response = openai.Completion.create(
+      engine="davinci-instruct-beta-v3",
+      prompt=prompt,
+      temperature=0.7,
+      max_tokens=100,
+      top_p=1,
+      frequency_penalty=0,
+      presence_penalty=0
+    )
+
+    return response.choices[0].text
+
+def BlogSections(prompt):
+    response = openai.Completion.create(
+      engine="davinci-instruct-beta-v3",
+      prompt=prompt,
+      temperature=0.6,
+      max_tokens=100,
+      top_p=1,
+      frequency_penalty=0,
+      presence_penalty=0
+    )
+
+    return response.choices[0].text
+
+
+def BlogContent(prompt):
+    response = openai.Completion.create(
+      engine="davinci-instruct-beta-v3",
+      prompt=prompt,
+      temperature=0.7,
+      max_tokens=400,
+      top_p=1,
+      frequency_penalty=0,
+      presence_penalty=0
+    )
+
+    return response.choices[0].text
+
+
+
+if __name__ == '__main__':
+    main()
